@@ -1,58 +1,51 @@
-const quoteContainer = document.getElementById('quote-container');
-const quoteText = document.getElementById('quote');
-const authorText = document.getElementById('author');
-const newQuoteBtn = document.getElementById('new-quote');
-const twitterBtn = document.getElementById('twitter');
+const imageContainer = document.getElementById('image-container');
 const loader = document.getElementById('loader');
 
-let apiQuotes = [];
+const count = 10;
+const apiKey = 'PTCAv9Wz6DMJ9ksTrsuyZcEX1_nio38XY0jpp8yDvQk';
+const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
 
-function loading() {
-  loader.hidden = false;
-  quoteContainer.hidden = true;
-}
-
-function complete() {
-  quoteContainer.hidden = false;
-  loader.hidden = true;
-}
-
-function newQuote() {
-  loading();
-  const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
-  if (!quote.author) {
-    authorText.textContent = 'Unknown';
-  } else {
-    authorText.textContent = quote.author;
+function setAttributes(element, attributes) {
+  for(const key in attributes) {
+    element.setAttribute(key, attributes[key]);
   }
-  if (quote.text.length > 120) {
-    quoteText.classList.add('long-quote');
-  } else {
-    quoteText.classList.remove('long-quote');
+}
+
+function displayPhotos() {
+  photosArray.forEach((photo) => {
+    const item = document.createElement('a');
+    //item.setAttribute('href', photo.links.html);
+    //item.setAttribute('target', '_blank');
+    setAttributes(item, {
+      href: photo.links.html,
+      target: '_blank',
+    });
+
+    const img = document.createElement('img');
+    //img.setAttribute('src', photo.urls.regular);
+    //img.setAttribute('alt', photo.alt_descrription);
+   // img.setAttribute('title', photo.alt_descrription);
+
+    setAttributes(img, {
+      src: photo.urls.regular,
+      alt: photo.alt_description,
+      title: photo.alt_description,
+    });
+
+    item.appendChild(img);
+    imageContainer.appendChild(item);
+  });
+}
+
+
+async function getPhotos() {
+  try {
+    const response = await fetch(apiUrl);
+    photosArray = await response.json();
+    displayPhotos();
+  } catch (error) {
+
   }
-  
-  quoteText.textContent = quote.text;  
-  complete();
 }
 
-async function getQuotes() {
-    const apiUrl = "https://type.fit/api/quotes";
-    try {
-      const response = await fetch(apiUrl);
-      apiQuotes = await response.json();
-      newQuote();
-    } catch (error) {
-      // Error handling
-      console.error("Error fetching quotes:", error);
-    }
-}
-
-function tweetQuote() {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${quoteText.textContent} - ${authorText.textContent}`;
-    window.open(twitterUrl, '_blank');
-}
-
-newQuoteBtn.addEventListener('click', newQuote);
-twitterBtn.addEventListener('click', tweetQuote);
-
-getQuotes();
+getPhotos();
